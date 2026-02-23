@@ -239,7 +239,7 @@ export function AdminLoginPage() {
 
   const isLoading = authLoading || adminLoading || checkingSystem;
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x0000000000000000000000AA';
-  const emailLoginEnabled = import.meta.env.VITE_EMAIL_LOGIN_ENABLED === 'true';
+  const emailLoginEnabled = import.meta.env.VITE_EMAIL_LOGIN_ENABLED === 'true' || false;
 
   useEffect(() => {
     if (authLoading || adminLoading || !user || isAdmin || needsSetup || unauthorizedHandled.current) return;
