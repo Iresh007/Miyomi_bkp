@@ -226,7 +226,7 @@ export function SubmitPage() {
       setForm(prev => ({
         ...prev,
         name: prev.name || data.name,
-        description: data.description || prev.description,
+        short_description: data.description || prev.short_description,
         website_url: data.homepage || prev.website_url,
 
         tags: [...new Set([...prev.tags, ...(data.topics || [])])],
