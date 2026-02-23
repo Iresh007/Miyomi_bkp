@@ -2,9 +2,22 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminRichTextEditor } from '@/components/admin/AdminRichTextEditor';
-import { AdminInput, AdminButton, AdminSelect, AdminTextarea, AdminFormField } from '@/components/admin/AdminFormElements';
-import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { AdminInput, AdminButton, AdminSelect, AdminTextarea, AdminFormField, Label } from '@/components/admin/AdminFormElements';
+import { ArrowLeft, Save, AlertCircle, ChevronsUpDown, Check, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 
 const emptyGuide = {
     title: '', description: '', content: '', author: '', category: '',
@@ -20,6 +33,9 @@ export function AdminGuideEditorPage() {
     const [saving, setSaving] = useState(false);
     const [slugTouched, setSlugTouched] = useState(!!id); // true when editing existing guide
     const [slugError, setSlugError] = useState('');
+    const [existingCategories, setExistingCategories] = useState<string[]>([]);
+    const [categoryOpen, setCategoryOpen] = useState(false);
+    const [categoryInput, setCategoryInput] = useState('');
 
     function generateSlug(text: string): string {
         return text
@@ -46,6 +62,17 @@ export function AdminGuideEditorPage() {
             setSlugError('');
         }
     }
+
+    useEffect(() => {
+        async function fetchCategories() {
+            const { data } = await supabase.from('guides').select('category');
+            if (data) {
+                const unique = [...new Set(data.map(g => g.category).filter(Boolean))] as string[];
+                setExistingCategories(unique.sort());
+            }
+        }
+        fetchCategories();
+    }, []);
 
     useEffect(() => {
         if (!id) return;
@@ -228,7 +255,75 @@ export function AdminGuideEditorPage() {
                         </AdminFormField>
 
                         <AdminFormField label="Category">
-                            <AdminInput value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} />
+                            <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
+                                <PopoverTrigger asChild>
+                                    <button
+                                        role="combobox"
+                                        aria-expanded={categoryOpen}
+                                        className="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--divider)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent"
+                                    >
+                                        <span className={form.category ? '' : 'text-[var(--text-secondary)]'}>
+                                            {form.category || 'Select or create...'}
+                                        </span>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[280px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput
+                                            placeholder="Search or type new..."
+                                            value={categoryInput}
+                                            onValueChange={setCategoryInput}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && categoryInput) {
+                                                    e.preventDefault();
+                                                    setForm(f => ({ ...f, category: categoryInput }));
+                                                    if (!existingCategories.includes(categoryInput)) {
+                                                        setExistingCategories(prev => [...prev, categoryInput].sort());
+                                                    }
+                                                    setCategoryInput('');
+                                                    setCategoryOpen(false);
+                                                }
+                                            }}
+                                        />
+                                        <CommandList>
+                                            <CommandEmpty>
+                                                {categoryInput ? (
+                                                    <button
+                                                        className="w-full text-left px-2 py-1.5 text-sm rounded-sm hover:bg-[var(--bg-elev-1)] flex items-center"
+                                                        onClick={() => {
+                                                            setForm(f => ({ ...f, category: categoryInput }));
+                                                            setExistingCategories(prev => [...prev, categoryInput].sort());
+                                                            setCategoryInput('');
+                                                            setCategoryOpen(false);
+                                                        }}
+                                                    >
+                                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                                        Create "{categoryInput}"
+                                                    </button>
+                                                ) : 'No categories found.'}
+                                            </CommandEmpty>
+                                            <CommandGroup heading="Existing Categories">
+                                                {existingCategories.map(cat => (
+                                                    <CommandItem
+                                                        key={cat}
+                                                        value={cat}
+                                                        onSelect={() => {
+                                                            setForm(f => ({ ...f, category: cat }));
+                                                            setCategoryInput('');
+                                                            setCategoryOpen(false);
+                                                        }}
+                                                        className="flex justify-between"
+                                                    >
+                                                        {cat}
+                                                        {form.category === cat && <Check className="h-4 w-4 opacity-50" />}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
                         </AdminFormField>
 
                         <AdminFormField label="Author">
