@@ -1,23 +1,31 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, REMEMBER_SESSION } from '@/integrations/supabase/client';
 import { useSessionTracker } from './useSessionTracker';
 import type { Session, User } from '@supabase/supabase-js';
+
+const SESSION_ACTIVE_KEY = 'miyomi_session_active';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { trackSession } = useSessionTracker();
-  // Use a ref so the effect doesn't depend on trackSession
   const trackSessionRef = useRef(trackSession);
   trackSessionRef.current = trackSession;
-  // Track if this is the initial session restore (not a fresh login)
   const isInitialLoad = useRef(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session: restored } }) => {
+      if (!REMEMBER_SESSION && restored && !sessionStorage.getItem(SESSION_ACTIVE_KEY)) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      setSession(restored);
+      setUser(restored?.user ?? null);
       setLoading(false);
     });
 
@@ -26,9 +34,9 @@ export function useAuth() {
       setUser(session?.user ?? null);
       setLoading(false);
 
-      // Track login ONLY if it's a fresh login (email or oauth)
-      // We use a localStorage flag 'auth_start' to know if we just started a login flow
       if (event === 'SIGNED_IN' && session) {
+        sessionStorage.setItem(SESSION_ACTIVE_KEY, 'true');
+
         if (isInitialLoad.current) {
           isInitialLoad.current = false;
         }
@@ -41,10 +49,14 @@ export function useAuth() {
           });
         }
       }
+
+      if (event === 'SIGNED_OUT') {
+        sessionStorage.removeItem(SESSION_ACTIVE_KEY);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []); // No dependencies - subscription is set up once and never re-created
+  }, []);
 
   const signInWithEmail = useCallback(async (email: string, password: string, captchaToken?: string) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -53,12 +65,10 @@ export function useAuth() {
       options: captchaToken ? { captchaToken } : undefined,
     });
     if (error) throw error;
-    // Track explicit email login
     await trackSessionRef.current('login').catch(console.error);
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    // Set flag to track login after redirect
     localStorage.setItem('auth_start', 'true');
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -69,18 +79,18 @@ export function useAuth() {
     });
     if (error) {
       console.error('Google sign-in error:', error);
-      localStorage.removeItem('auth_start'); // Clean up on error
+      localStorage.removeItem('auth_start');
     }
   }, []);
 
   const signOut = useCallback(async () => {
-    // Track logout before signing out
     await trackSessionRef.current('logout').catch(err => {
       console.error('Failed to track logout session:', err);
     });
 
+    sessionStorage.removeItem(SESSION_ACTIVE_KEY);
     await supabase.auth.signOut();
-  }, []); // No dependency on trackSession - uses ref
+  }, []);
 
   return { session, user, loading, signInWithEmail, signInWithGoogle, signOut };
 }
