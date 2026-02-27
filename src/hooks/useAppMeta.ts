@@ -35,6 +35,7 @@ export function useAppMeta(): { apps: AppData[]; loading: boolean } {
             downloads: app.download_count || undefined,
             likes: app.likes_count || undefined,
             rating: app.metadata?.rating || undefined,
+            createdAt: app.created_at || undefined,
         }));
     };
 

@@ -41,6 +41,7 @@ export interface AppData {
     likes?: number;
     forkOf?: string;
     upstreamUrl?: string;
+    createdAt?: string;
 }
 
 

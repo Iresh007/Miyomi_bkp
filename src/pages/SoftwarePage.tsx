@@ -18,7 +18,7 @@ interface SoftwarePageProps {
   onNavigate?: (path: string) => void;
 }
 
-type SortOption = 'name-asc' | 'name-desc' | 'updated-desc' | 'updated-asc' | 'rating' | 'downloads' | 'loved';
+type SortOption = 'name-asc' | 'name-desc' | 'updated-desc' | 'updated-asc' | 'rating' | 'downloads' | 'loved' | 'added-desc' | 'added-asc';
 
 const contentTypes = ['All', 'Manga', 'Anime', 'Light Novel', 'Webtoon', 'Comics', 'Multi'];
 const platforms = ['All', 'Android', 'iOS', 'Windows', 'macOS', 'Linux', 'Web'];
@@ -67,6 +67,7 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
     { id: 'updated', label: 'Updated', defaultDir: 'desc' },
     { id: 'downloads', label: 'Popular', defaultDir: 'desc' },
     { id: 'loved', label: 'Loved', defaultDir: 'desc' },
+    { id: 'added', label: 'Added', defaultDir: 'desc' },
   ] as const;
 
   const handleSortChange = (fieldId: string) => {
@@ -182,8 +183,13 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
           return dir * ((a.lastUpdated || '').localeCompare(b.lastUpdated || ''));
         case 'downloads':
           return dir * ((a.downloads || 0) - (b.downloads || 0));
-        case 'loved':
-          return dir * ((voteRegistry[a.id]?.count || 0) - (voteRegistry[b.id]?.count || 0));
+        case 'loved': {
+          const aLoved = Math.max(a.likes || 0, voteRegistry[a.id]?.count || 0);
+          const bLoved = Math.max(b.likes || 0, voteRegistry[b.id]?.count || 0);
+          return dir * (aLoved - bLoved);
+        }
+        case 'added':
+          return dir * ((a.createdAt || '').localeCompare(b.createdAt || ''));
         default:
           return 0;
       }
