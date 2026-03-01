@@ -4,6 +4,7 @@ import { AdminFormField, AdminInput, AdminTextarea, AdminSelect, AdminButton } f
 import { AdminSmartSelect } from '@/components/admin/AdminSmartSelect';
 import { extractColorFromImage } from '@/utils/extractColorFromImage';
 import { toast } from 'sonner';
+import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
 
 const PLATFORM_OPTIONS = ['Android', 'iOS', 'Windows', 'macOS', 'Linux', 'Web'];
 const CONTENT_TYPE_OPTIONS = ['Anime', 'Manga', 'Light Novel', 'Webtoon', 'Comics'];
@@ -222,8 +223,8 @@ export function SubmissionEditForm({ type, data, onChange }: SubmissionEditFormP
                         placeholder="https://..."
                     />
                 </AdminFormField>
-                <AdminFormField label="Discord URL">
-                    <AdminInput value={form.discord_url || ''} onChange={e => updateField('discord_url', e.target.value)} placeholder="https://discord.gg/..." />
+                <AdminFormField label="Community URL">
+                    <CommunityUrlInput value={form.discord_url || ''} onChange={(url) => updateField('discord_url', url)} placeholder="https://discord.gg/... or https://t.me/..." />
                 </AdminFormField>
                 {type === 'app' && (
                     <AdminFormField label="Download URL">

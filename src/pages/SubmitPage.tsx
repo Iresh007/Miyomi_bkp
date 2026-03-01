@@ -12,6 +12,7 @@ import {
 import { toast } from 'sonner';
 import Turnstile from 'react-turnstile';
 import { Navbar } from '@/components/Navbar';
+import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
 
 
 const PLATFORM_OPTIONS = ['Android', 'iOS', 'Windows', 'macOS', 'Linux', 'Web'];
@@ -24,7 +25,6 @@ export function SubmitPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Derive step & type from URL search params
   const STEP_MAP: Record<string, number> = { select: 0, guidelines: 1, form: 2, success: 3 };
   const STEP_NAMES = ['select', 'guidelines', 'form', 'success'];
 
@@ -33,7 +33,6 @@ export function SubmitPage() {
   const step = STEP_MAP[urlStep] ?? 0;
   const type = (urlType === 'app' || urlType === 'extension') ? urlType : null;
 
-  // If we're on a step that requires a type but don't have one, reset
   useEffect(() => {
     if (step > 0 && !type) {
       setSearchParams({}, { replace: true });
@@ -173,7 +172,6 @@ export function SubmitPage() {
     checkDuplicates();
   }, [form.name, form.repo_url]);
 
-  // Fetch app options for extension compatible_with
   useEffect(() => {
     async function fetchApps() {
       const { data } = await supabase.from('apps').select('name').order('name');
@@ -545,10 +543,11 @@ export function SubmitPage() {
                   placeholder="https://..."
                 />
               </AdminFormField>
-              <AdminFormField label="Discord URL">
-                <AdminInput
-                  value={form.discord_url} onChange={e => setForm(f => ({ ...f, discord_url: e.target.value }))}
-                  placeholder="https://discord.gg/..."
+              <AdminFormField label="Community URL">
+                <CommunityUrlInput
+                  value={form.discord_url}
+                  onChange={(url) => setForm(f => ({ ...f, discord_url: url }))}
+                  placeholder="https://discord.gg/... or https://t.me/..."
                 />
               </AdminFormField>
             </div>

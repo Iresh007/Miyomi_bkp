@@ -7,6 +7,7 @@ import { AdminSmartSelect } from '@/components/admin/AdminSmartSelect';
 import { ArrowLeft, Save, Loader2, Palette, Github, Download, Copy, Check, Link2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { extractColorFromImage } from '@/utils/extractColorFromImage';
+import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
 
 function slugify(text: string): string {
     return text
@@ -68,7 +69,6 @@ export function AdminExtensionFormPage() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
-    // Tutorial Selection State
     const [guideOptions, setGuideOptions] = useState<string[]>([]);
     const [guidesData, setGuidesData] = useState<any[]>([]);
     const [selectedGuideTitles, setSelectedGuideTitles] = useState<string[]>([]);
@@ -480,8 +480,8 @@ export function AdminExtensionFormPage() {
                             <AdminFormField label="Source URL">
                                 <AdminInput value={form.source_url} onChange={e => setForm(f => ({ ...f, source_url: e.target.value }))} placeholder="https://..." />
                             </AdminFormField>
-                            <AdminFormField label="Discord URL">
-                                <AdminInput value={form.discord_url} onChange={e => setForm(f => ({ ...f, discord_url: e.target.value }))} placeholder="https://discord.gg/..." />
+                            <AdminFormField label="Community URL">
+                                <CommunityUrlInput value={form.discord_url} onChange={(url) => setForm(f => ({ ...f, discord_url: url }))} placeholder="https://discord.gg/... or https://t.me/..." />
                             </AdminFormField>
                         </div>
                     </div>

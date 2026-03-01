@@ -7,6 +7,7 @@ import { AdminSmartSelect } from '@/components/admin/AdminSmartSelect';
 import { ArrowLeft, Save, Loader2, Github, Download, Palette, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { extractColorFromImage } from '@/utils/extractColorFromImage';
+import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
 
 function slugify(text: string): string {
     return text
@@ -44,7 +45,6 @@ export function AdminAppFormPage() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
-    // Tutorial Selection State
     const [guideOptions, setGuideOptions] = useState<string[]>([]);
     const [guidesData, setGuidesData] = useState<any[]>([]);
     const [selectedGuideTitles, setSelectedGuideTitles] = useState<string[]>([]);
@@ -56,7 +56,6 @@ export function AdminAppFormPage() {
         fetchGuides();
     }, [id]);
 
-    // Auto-extract color when icon_url changes
     useEffect(() => {
         if (form.icon_url && !form.icon_color) {
             handleColorExtraction(form.icon_url);
@@ -78,7 +77,6 @@ export function AdminAppFormPage() {
         setExtractingColor(false);
     }
 
-    // Real-time Duplicate Checking
     useEffect(() => {
         const timer = setTimeout(async () => {
             if (form.name.trim()) {
@@ -171,7 +169,6 @@ export function AdminAppFormPage() {
                     likes_count: appData.likes_count || 0
                 });
                 if (appData.slug) setSlugManuallyEdited(true);
-                // Map tutorials objects to titles
                 setSelectedGuideTitles(loadedTutorials.map((t: any) => t.title).filter(Boolean));
             }
         } catch (err: any) {
@@ -198,12 +195,10 @@ export function AdminAppFormPage() {
         setFetchingGithub(true);
 
         try {
-            // Fetch Repo Info
             const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
             if (!res.ok) throw new Error("GitHub API error: " + res.statusText);
             const data = await res.json();
 
-            // Fetch Latest Release for Version
             let version = form.version;
             try {
                 const relRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
@@ -244,7 +239,6 @@ export function AdminAppFormPage() {
 
     async function handleSave() {
         setSaving(true);
-        // Errors are updated in real-time by useEffect
         if (Object.values(errors).some(v => !!v)) {
             toast.error("Please fix duplicate entries before saving.");
             setSaving(false);
@@ -252,7 +246,6 @@ export function AdminAppFormPage() {
         }
 
         try {
-            // Final safety check
             const dupName = await checkDuplicate('name', form.name);
             if (dupName) {
                 toast.error(`An app with the name "${form.name}" already exists.`);
@@ -260,7 +253,6 @@ export function AdminAppFormPage() {
                 return;
             }
 
-            // Reconstruct tutorials
             const finalTutorials = selectedGuideTitles.map(title => {
                 const guide = guidesData.find(g => g.title === title);
                 if (guide) {
@@ -300,7 +292,6 @@ export function AdminAppFormPage() {
                 const { error } = await (supabase.from('apps') as any).update(payload).eq('id', id);
                 if (error) throw error;
 
-                // Log update action
                 await logAction('update', 'app', id, form.name).catch(err => {
                     console.error('Failed to log update action:', err);
                 });
@@ -310,7 +301,6 @@ export function AdminAppFormPage() {
                 const { data, error } = await (supabase.from('apps') as any).insert(payload).select().single();
                 if (error) throw error;
 
-                // Log create action
                 if (data) {
                     await logAction('create', 'app', data.id, form.name).catch(err => {
                         console.error('Failed to log create action:', err);
@@ -453,8 +443,8 @@ export function AdminAppFormPage() {
                             />
                         </AdminFormField>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <AdminFormField label="Discord URL">
-                                <AdminInput value={form.discord_url} onChange={e => setForm(f => ({ ...f, discord_url: e.target.value }))} placeholder="https://discord.gg/..." />
+                            <AdminFormField label="Community URL">
+                                <CommunityUrlInput value={form.discord_url} onChange={(url) => setForm(f => ({ ...f, discord_url: url }))} placeholder="https://discord.gg/... or https://t.me/..." />
                             </AdminFormField>
                             <AdminFormField label="Download URL">
                                 <AdminInput value={form.download_url} onChange={e => setForm(f => ({ ...f, download_url: e.target.value }))} placeholder="https://..." />

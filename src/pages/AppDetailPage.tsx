@@ -19,6 +19,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Autoplay from 'embla-carousel-autoplay';
 
 import { DiscordIcon } from '../components/DiscordIcon';
+import { detectPlatform, getPlatform } from '../utils/communityPlatforms';
+import { PlatformIcon } from '../components/admin/CommunityUrlInput';
 
 type StatusStyle = {
   bg: string;
@@ -259,11 +261,13 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
   const hasTutorials = tutorials.length > 0;
 
   const hasGithub = Boolean(app.githubUrl);
-  const hasDiscord = Boolean(app.discordUrl);
+  const hasCommunityUrl = Boolean(app.discordUrl);
+  const communityPlatformId = hasCommunityUrl ? detectPlatform(app.discordUrl!) : 'other';
+  const communityPlatform = hasCommunityUrl ? getPlatform(communityPlatformId) : null;
   const hasOfficialSite = Boolean(app.officialSite);
   const downloadUrl = app.officialSite || app.githubUrl;
   const hasDownload = Boolean(downloadUrl);
-  const hasAnyActions = hasDownload || hasDiscord || hasOfficialSite;
+  const hasAnyActions = hasDownload || hasCommunityUrl || hasOfficialSite;
 
   const inlineActions = hasAnyActions ? (
     <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
@@ -278,15 +282,15 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
           <Github className="w-5 h-5" />
         </a>
       )}
-      {hasDiscord && (
+      {hasCommunityUrl && communityPlatform && (
         <a
           href={app.discordUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="p-3 bg-[var(--bg-elev-1)] border border-[var(--divider)] rounded-xl hover:bg-[var(--chip-bg)] hover:border-[var(--brand)] transition-all text-[var(--text-secondary)] hover:text-[var(--brand)]"
-          title="Discord"
+          title={communityPlatform.label}
         >
-          <DiscordIcon className="w-5 h-5" />
+          <PlatformIcon platformId={communityPlatformId} className="w-5 h-5" />
         </a>
       )}
       {hasOfficialSite && (
@@ -487,7 +491,7 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
                 </a>
               )}
 
-              {app.discordUrl && (
+              {hasCommunityUrl && communityPlatform && (
                 <a
                   href={app.discordUrl}
                   target="_blank"
@@ -495,11 +499,11 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
                   className="group flex items-center gap-3 rounded-2xl border border-[var(--divider)] bg-[var(--bg-surface)]/50 px-4 py-3 text-left transition-all hover:border-[var(--brand)] hover:bg-[var(--bg-elev-1)]"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--chip-bg)] text-[var(--brand)] group-hover:scale-110 transition-transform">
-                    <DiscordIcon className="w-5 h-5" />
+                    <PlatformIcon platformId={communityPlatformId} className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-['Inter',sans-serif] font-semibold text-[var(--text-primary)] text-sm">
-                      Discord
+                      {communityPlatform.label}
                     </p>
                     <p className="font-['Inter',sans-serif] text-xs text-[var(--text-secondary)] truncate">
                       Join the community
