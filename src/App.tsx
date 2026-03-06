@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Toaster } from "./components/ui/sonner";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { LikeProvider } from "./context/LikeContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { NoticeBanner } from "./components/NoticeBanner";
@@ -242,7 +243,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <AppContent />
+        <LikeProvider>
+          <AppContent />
+        </LikeProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

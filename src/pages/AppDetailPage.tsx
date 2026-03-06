@@ -381,7 +381,7 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
               >
                 {app.name}
               </h1>
-              <LoveButton itemId={app.id} size="lg" />
+              <LoveButton itemId={app.id} fallbackCount={app.likes || 0} size="lg" />
             </div>
 
             {authorInfo && (

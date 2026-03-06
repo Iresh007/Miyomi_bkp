@@ -9,13 +9,11 @@ import { AppLogo } from './AppLogo';
 
 interface ExtensionListCardProps {
   extension: ExtensionData;
-  voteData?: { count: number; loved: boolean };
-  allowFetch?: boolean;
   isHighlighted?: boolean;
   onSelect: (extensionId: string) => void;
 }
 
-export function ExtensionListCard({ extension, voteData, allowFetch = true, isHighlighted, onSelect }: ExtensionListCardProps) {
+export function ExtensionListCard({ extension, isHighlighted, onSelect }: ExtensionListCardProps) {
   const handleSelect = () => onSelect(extension.slug || extension.id);
   const accentColor = useAccentColor({
     logoUrl: extension.logoUrl,
@@ -69,7 +67,7 @@ export function ExtensionListCard({ extension, voteData, allowFetch = true, isHi
 
       {/* Action - Love Button & View */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <LoveButton itemId={extension.id} preloadedState={voteData} allowFetch={allowFetch} />
+        <LoveButton itemId={extension.id} itemType="extension" fallbackCount={extension.likes || 0} />
 
         <button
           onClick={(event) => {

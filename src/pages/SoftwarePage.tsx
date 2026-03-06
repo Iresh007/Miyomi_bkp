@@ -11,7 +11,7 @@ import { FeedbackPanel } from '../components/FeedbackPanel';
 import { FeedbackTrigger } from '../components/FeedbackTrigger';
 import { useFeedbackState } from '../hooks/useFeedbackState';
 import { AnimatePresence } from 'motion/react';
-import { useVoteRegistry } from '../hooks/useVoteRegistry';
+import { useLikes } from '../context/LikeContext';
 import { Skeleton } from '../components/ui/skeleton';
 
 interface SoftwarePageProps {
@@ -97,7 +97,7 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
   };
 
   const { isFeedbackOpen, handleToggle, handleClose } = useFeedbackState();
-  const { votes: voteRegistry } = useVoteRegistry();
+  const { getLikeData } = useLikes();
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
 
@@ -184,8 +184,8 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
         case 'downloads':
           return dir * ((a.downloads || 0) - (b.downloads || 0));
         case 'loved': {
-          const aLoved = Math.max(a.likes || 0, voteRegistry[a.id]?.count || 0);
-          const bLoved = Math.max(b.likes || 0, voteRegistry[b.id]?.count || 0);
+          const aLoved = getLikeData(a.id).count;
+          const bLoved = getLikeData(b.id).count;
           return dir * (aLoved - bLoved);
         }
         case 'added':
@@ -196,7 +196,7 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
     });
 
     return filtered;
-  }, [unifiedApps, selectedContentType, selectedPlatform, searchQuery, sortBy, voteRegistry]);
+  }, [unifiedApps, selectedContentType, selectedPlatform, searchQuery, sortBy, getLikeData]);
 
 
   useEffect(() => {
@@ -358,14 +358,11 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
                 logoUrl={app.logoUrl}
                 rating={app.rating}
                 downloads={app.downloads}
-                voteData={{
-                  count: Math.max(app.likes || 0, voteRegistry[app.id]?.count || 0),
-                  loved: voteRegistry[app.id]?.loved || false
-                }}
-                allowFetch={false}
+                likes={app.likes}
+
                 forkOf={app.forkOf}
                 upstreamUrl={app.upstreamUrl}
-                isHighlighted={highlightedId === app.id}
+                isHighlighted={highlightedId === app.id || highlightedId === app.slug}
                 onClick={() => handleAppClick(app.slug || app.id)}
               />
             ))}
@@ -384,14 +381,10 @@ export function SoftwarePage({ onNavigate }: SoftwarePageProps) {
                 logoUrl={app.logoUrl}
                 rating={app.rating}
                 downloads={app.downloads}
-                voteData={{
-                  count: Math.max(app.likes || 0, voteRegistry[app.id]?.count || 0),
-                  loved: voteRegistry[app.id]?.loved || false
-                }}
-                allowFetch={false}
+                likes={app.likes}
                 forkOf={app.forkOf}
                 upstreamUrl={app.upstreamUrl}
-                isHighlighted={highlightedId === app.id}
+                isHighlighted={highlightedId === app.id || highlightedId === app.slug}
                 onClick={() => handleAppClick(app.slug || app.id)}
               />
             ))}

@@ -11,7 +11,7 @@ import { FeedbackPanel } from '../components/FeedbackPanel';
 import { FeedbackTrigger } from '../components/FeedbackTrigger';
 import { useFeedbackState } from '../hooks/useFeedbackState';
 import { AnimatePresence } from 'motion/react';
-import { useVoteRegistry } from '../hooks/useVoteRegistry';
+import { useLikes } from '../context/LikeContext';
 
 interface ExtensionsPageProps {
   onNavigate?: (path: string) => void;
@@ -97,7 +97,7 @@ export function ExtensionsPage({ onNavigate }: ExtensionsPageProps) {
 
 
   const { isFeedbackOpen, handleToggle, handleClose } = useFeedbackState();
-  const { votes: voteRegistry } = useVoteRegistry();
+  const { getLikeData } = useLikes();
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const navType = useNavigationType();
 
@@ -181,8 +181,8 @@ export function ExtensionsPage({ onNavigate }: ExtensionsPageProps) {
         case 'updated':
           return dir * ((a.lastUpdated || '').localeCompare(b.lastUpdated || ''));
         case 'loved': {
-          const aLoved = Math.max(a.likes || 0, voteRegistry[a.id]?.count || 0);
-          const bLoved = Math.max(b.likes || 0, voteRegistry[b.id]?.count || 0);
+          const aLoved = getLikeData(a.id).count;
+          const bLoved = getLikeData(b.id).count;
           return dir * (aLoved - bLoved);
         }
         case 'added':
@@ -193,7 +193,7 @@ export function ExtensionsPage({ onNavigate }: ExtensionsPageProps) {
     });
 
     return filtered;
-  }, [unifiedExtensions, selectedApp, selectedType, searchQuery, sortBy, voteRegistry]);
+  }, [unifiedExtensions, selectedApp, selectedType, searchQuery, sortBy, getLikeData]);
 
 
   useEffect(() => {
@@ -344,11 +344,6 @@ export function ExtensionsPage({ onNavigate }: ExtensionsPageProps) {
               <ExtensionGridCard
                 key={ext.id}
                 extension={ext}
-                voteData={{
-                  count: Math.max(ext.likes || 0, voteRegistry[ext.id]?.count || 0),
-                  loved: voteRegistry[ext.id]?.loved || false
-                }}
-                allowFetch={false}
                 isHighlighted={highlightedId === ext.id || highlightedId === ext.slug}
                 onSelect={handleExtensionClick}
               />
@@ -360,11 +355,6 @@ export function ExtensionsPage({ onNavigate }: ExtensionsPageProps) {
               <ExtensionListCard
                 key={ext.id}
                 extension={ext}
-                voteData={{
-                  count: Math.max(ext.likes || 0, voteRegistry[ext.id]?.count || 0),
-                  loved: voteRegistry[ext.id]?.loved || false
-                }}
-                allowFetch={false}
                 isHighlighted={highlightedId === ext.id || highlightedId === ext.slug}
                 onSelect={handleExtensionClick}
               />

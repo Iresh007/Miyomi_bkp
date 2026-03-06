@@ -17,8 +17,7 @@ interface AppListCardProps {
   logoUrl?: string;
   rating?: number;
   downloads?: number;
-  voteData?: { count: number; loved: boolean };
-  allowFetch?: boolean;
+  likes?: number;
   forkOf?: string;
   upstreamUrl?: string;
   isHighlighted?: boolean;
@@ -35,8 +34,7 @@ export function AppListCard({
   logoUrl,
   rating,
   downloads,
-  voteData,
-  allowFetch = true,
+  likes,
   forkOf,
   upstreamUrl,
   isHighlighted,
@@ -58,8 +56,8 @@ export function AppListCard({
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
       className={`flex items-center gap-3 p-3 bg-[var(--bg-surface)] border border-[var(--divider)] border-l-4 rounded-xl hover:shadow-lg hover:border-[var(--brand)] transition-all w-full text-left group ${isHighlighted
-          ? 'ring-2 ring-[var(--brand)] shadow-[0_8px_30px_rgba(0,0,0,0.12),0_0_0_4px_rgba(var(--brand-rgb),0.2)]'
-          : 'shadow-[0_4px_12px_0_rgba(0,0,0,0.05)]'
+        ? 'ring-2 ring-[var(--brand)] shadow-[0_8px_30px_rgba(0,0,0,0.12),0_0_0_4px_rgba(var(--brand-rgb),0.2)]'
+        : 'shadow-[0_4px_12px_0_rgba(0,0,0,0.05)]'
         }`}
       style={{ borderLeftColor: accentColor }}
     >
@@ -135,7 +133,7 @@ export function AppListCard({
 
       {/* Action - Love Button & View */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <LoveButton itemId={appId} preloadedState={voteData} allowFetch={allowFetch} />
+        <LoveButton itemId={appId} fallbackCount={likes || 0} />
 
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[var(--chip-bg)] group-hover:bg-[var(--brand)] text-[var(--text-primary)] group-hover:text-white rounded-lg transition-all">
           <ExternalLink className="w-3.5 h-3.5" />

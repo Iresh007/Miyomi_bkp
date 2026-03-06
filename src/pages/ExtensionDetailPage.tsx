@@ -13,7 +13,7 @@ import { LoveButton } from '../components/LoveButton';
 import { useExtension } from '../hooks/useExtension';
 import { useAppMeta } from '../hooks/useAppMeta';
 import { Skeleton } from '../components/ui/skeleton';
-import { useVoteRegistry } from '../hooks/useVoteRegistry';
+
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from '../components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -25,7 +25,7 @@ interface ExtensionDetailPageProps {
 export function ExtensionDetailPage({ extensionId, onNavigate }: ExtensionDetailPageProps) {
   const { extension, loading: extensionLoading } = useExtension(extensionId);
   const { apps: allApps, loading: appsLoading } = useAppMeta();
-  const { votes: voteRegistry } = useVoteRegistry();
+
 
   const accentColor = useAccentColor({
     logoUrl: extension?.logoUrl,
@@ -370,7 +370,7 @@ export function ExtensionDetailPage({ extensionId, onNavigate }: ExtensionDetail
                 {extension.name}
               </h1>
 
-              <LoveButton itemId={extension.id} size="lg" />
+              <LoveButton itemId={extension.id} itemType="extension" fallbackCount={extension.likes || 0} size="lg" />
             </div>
 
             {/* Short Description */}
@@ -584,10 +584,7 @@ export function ExtensionDetailPage({ extensionId, onNavigate }: ExtensionDetail
                       logoUrl={app.logoUrl}
                       rating={app.rating}
                       downloads={app.downloads}
-                      voteData={{
-                        count: Math.max(app.likes || 0, voteRegistry[app.id]?.count || 0),
-                        loved: voteRegistry[app.id]?.loved || false
-                      }}
+
                       forkOf={app.forkOf}
                       upstreamUrl={app.upstreamUrl}
                       onClick={() => onNavigate?.(`/software/${app.slug || app.id}`)}
