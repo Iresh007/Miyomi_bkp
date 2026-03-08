@@ -195,6 +195,17 @@ export function SubmitPage() {
     setExtractingColor(false);
   }
 
+  useEffect(() => {
+    if (form.repo_url && !form.download_url && type === 'app') {
+      const match = form.repo_url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+      if (match) {
+        const [_, owner, repo] = match;
+        const cleanRepo = repo.replace(/\.git$/, '').split('#')[0].split('?')[0];
+        setForm(f => ({ ...f, download_url: `https://github.com/${owner}/${cleanRepo}/releases/latest` }));
+      }
+    }
+  }, [form.repo_url, form.download_url, type]);
+
 
   async function handleGithubFetch() {
     if (!form.repo_url) return toast.error("Please enter a GitHub URL first");
@@ -214,11 +225,15 @@ export function SubmitPage() {
 
 
       let version = form.version;
+      let downloadUrl = form.download_url;
       try {
         const relRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
         if (relRes.ok) {
           const relData = await relRes.json();
           if (relData.tag_name) version = relData.tag_name;
+          if (!downloadUrl) {
+            downloadUrl = `https://github.com/${owner}/${repo}/releases/latest`;
+          }
         }
       } catch (e) { console.warn("No release found", e); }
 
@@ -227,7 +242,7 @@ export function SubmitPage() {
         name: prev.name || data.name,
         short_description: data.description || prev.short_description,
         website_url: data.homepage || prev.website_url,
-
+        download_url: prev.download_url || downloadUrl,
         tags: [...new Set([...prev.tags, ...(data.topics || [])])],
         author: data.owner?.login || prev.author,
         icon_url: prev.icon_url || data.owner?.avatar_url || '',

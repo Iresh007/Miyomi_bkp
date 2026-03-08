@@ -137,6 +137,17 @@ export function AdminAppFormPage() {
         }
     }
 
+    useEffect(() => {
+        if (form.repo_url && !form.download_url) {
+            const match = form.repo_url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+            if (match) {
+                const [_, owner, repo] = match;
+                const cleanRepo = repo.replace(/\.git$/, '').split('#')[0].split('?')[0];
+                setForm(f => ({ ...f, download_url: `https://github.com/${owner}/${cleanRepo}/releases/latest` }));
+            }
+        }
+    }, [form.repo_url, form.download_url]);
+
     async function fetchApp(appId: string) {
         try {
             const { data, error } = await (supabase.from('apps') as any).select('*').eq('id', appId).single();
@@ -202,11 +213,15 @@ export function AdminAppFormPage() {
             const data = await res.json();
 
             let version = form.version;
+            let downloadUrl = form.download_url;
             try {
                 const relRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
                 if (relRes.ok) {
                     const relData = await relRes.json();
                     if (relData.tag_name) version = relData.tag_name;
+                    if (!downloadUrl) {
+                        downloadUrl = `https://github.com/${owner}/${repo}/releases/latest`;
+                    }
                 }
             } catch (e) {
                 console.warn("Failed to fetch releases", e);
@@ -217,6 +232,7 @@ export function AdminAppFormPage() {
                 name: prev.name || data.name,
                 short_description: data.description || prev.short_description,
                 website_url: data.homepage || prev.website_url,
+                download_url: prev.download_url || downloadUrl,
                 tags: [...new Set([...prev.tags, ...(data.topics || [])])],
                 author: data.owner?.login || prev.author,
                 icon_url: prev.icon_url || data.owner?.avatar_url || '',
