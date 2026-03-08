@@ -261,9 +261,8 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
   const hasTutorials = tutorials.length > 0;
 
   const hasGithub = Boolean(app.githubUrl);
-  const hasCommunityUrl = Boolean(app.discordUrl);
-  const communityPlatformId = hasCommunityUrl ? detectPlatform(app.discordUrl!) : 'other';
-  const communityPlatform = hasCommunityUrl ? getPlatform(communityPlatformId) : null;
+  const socialUrls = (app.socialUrls && app.socialUrls.length > 0) ? app.socialUrls : (app.discordUrl ? [app.discordUrl] : []);
+  const hasCommunityUrl = socialUrls.length > 0;
   const hasOfficialSite = Boolean(app.officialSite);
   const downloadUrl = app.officialSite || app.githubUrl;
   const hasDownload = Boolean(downloadUrl);
@@ -282,17 +281,22 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
           <Github className="w-5 h-5" />
         </a>
       )}
-      {hasCommunityUrl && communityPlatform && (
-        <a
-          href={app.discordUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 bg-[var(--bg-elev-1)] border border-[var(--divider)] rounded-xl hover:bg-[var(--chip-bg)] hover:border-[var(--brand)] transition-all text-[var(--text-secondary)] hover:text-[var(--brand)]"
-          title={communityPlatform.label}
-        >
-          <PlatformIcon platformId={communityPlatformId} className="w-5 h-5" />
-        </a>
-      )}
+      {socialUrls.map((url, idx) => {
+        const platformId = detectPlatform(url);
+        const platform = getPlatform(platformId);
+        return (
+          <a
+            key={idx}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-3 bg-[var(--bg-elev-1)] border border-[var(--divider)] rounded-xl hover:bg-[var(--chip-bg)] hover:border-[var(--brand)] transition-all text-[var(--text-secondary)] hover:text-[var(--brand)]"
+            title={platform.label}
+          >
+            <PlatformIcon platformId={platformId} className="w-5 h-5" />
+          </a>
+        );
+      })}
       {hasOfficialSite && (
         <a
           href={app.officialSite}
@@ -491,27 +495,32 @@ export function AppDetailPage({ appId, onNavigate }: AppDetailPageProps) {
                 </a>
               )}
 
-              {hasCommunityUrl && communityPlatform && (
-                <a
-                  href={app.discordUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 rounded-2xl border border-[var(--divider)] bg-[var(--bg-surface)]/50 px-4 py-3 text-left transition-all hover:border-[var(--brand)] hover:bg-[var(--bg-elev-1)]"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--chip-bg)] text-[var(--brand)] group-hover:scale-110 transition-transform">
-                    <PlatformIcon platformId={communityPlatformId} className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-['Inter',sans-serif] font-semibold text-[var(--text-primary)] text-sm">
-                      {communityPlatform.label}
-                    </p>
-                    <p className="font-['Inter',sans-serif] text-xs text-[var(--text-secondary)] truncate">
-                      Join the community
-                    </p>
-                  </div>
-                  <span className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-              )}
+              {socialUrls.map((url, idx) => {
+                const platformId = detectPlatform(url);
+                const platform = getPlatform(platformId);
+                return (
+                  <a
+                    key={idx}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-3 rounded-2xl border border-[var(--divider)] bg-[var(--bg-surface)]/50 px-4 py-3 text-left transition-all hover:border-[var(--brand)] hover:bg-[var(--bg-elev-1)]"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--chip-bg)] text-[var(--brand)] group-hover:scale-110 transition-transform">
+                      <PlatformIcon platformId={platformId} className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-['Inter',sans-serif] font-semibold text-[var(--text-primary)] text-sm">
+                        {platform.label}
+                      </p>
+                      <p className="font-['Inter',sans-serif] text-xs text-[var(--text-secondary)] truncate">
+                        Join the community
+                      </p>
+                    </div>
+                    <span className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform">→</span>
+                  </a>
+                );
+              })}
 
               {app.officialSite && (
                 <a

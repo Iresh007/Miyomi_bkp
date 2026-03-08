@@ -107,7 +107,8 @@ export function AdminSubmissionsPage() {
           icon_url: data.icon_url,
           icon_color: data.icon_color,
           website_url: data.website_url,
-          discord_url: data.discord_url || null,
+          discord_url: data.social_urls?.[0] || data.discord_url || null,
+          social_urls: (Array.isArray(data.social_urls) ? data.social_urls.filter((u: string) => u?.trim()) : (data.discord_url ? [data.discord_url] : [])),
         };
 
         if (sub.submission_type === 'app') {
@@ -204,8 +205,8 @@ export function AdminSubmissionsPage() {
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${statusFilter === tab.key
-                  ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-md shadow-[var(--brand)]/20'
-                  : 'bg-[var(--bg-elev-1)] text-[var(--text-secondary)] border-[var(--divider)] hover:border-[var(--brand)] hover:text-[var(--text-primary)]'
+                ? 'bg-[var(--brand)] text-white border-[var(--brand)] shadow-md shadow-[var(--brand)]/20'
+                : 'bg-[var(--bg-elev-1)] text-[var(--text-secondary)] border-[var(--divider)] hover:border-[var(--brand)] hover:text-[var(--text-primary)]'
                 }`}
             >
               {tab.label}

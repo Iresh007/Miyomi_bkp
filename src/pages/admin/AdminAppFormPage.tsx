@@ -7,7 +7,7 @@ import { AdminSmartSelect } from '@/components/admin/AdminSmartSelect';
 import { ArrowLeft, Save, Loader2, Github, Download, Palette, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { extractColorFromImage } from '@/utils/extractColorFromImage';
-import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
+import { SocialUrlsInput } from '@/components/admin/SocialUrlsInput';
 
 function slugify(text: string): string {
     return text
@@ -24,7 +24,7 @@ const emptyApp = {
     status: 'approved', platforms: [] as string[], tags: [] as string[],
     content_types: [] as string[],
     repo_url: '', download_url: '', website_url: '', icon_url: '', icon_color: '',
-    fork_of: '', upstream_url: '', discord_url: '',
+    fork_of: '', upstream_url: '', social_urls: [] as string[],
     tutorials: [] as any[],
     download_count: 0, likes_count: 0
 };
@@ -163,7 +163,9 @@ export function AdminAppFormPage() {
                     icon_color: appData.icon_color || '',
                     fork_of: appData.fork_of || '',
                     upstream_url: appData.upstream_url || '',
-                    discord_url: appData.discord_url || '',
+                    social_urls: (Array.isArray(appData.social_urls) && appData.social_urls.length > 0)
+                        ? appData.social_urls.filter((u: string) => u)
+                        : (appData.discord_url ? [appData.discord_url] : []),
                     tutorials: loadedTutorials,
                     download_count: appData.download_count || 0,
                     likes_count: appData.likes_count || 0
@@ -281,7 +283,8 @@ export function AdminAppFormPage() {
                 icon_color: form.icon_color || null,
                 fork_of: form.fork_of || null,
                 upstream_url: form.upstream_url || null,
-                discord_url: form.discord_url || null,
+                social_urls: form.social_urls.filter(u => u.trim()) || [],
+                discord_url: form.social_urls.filter(u => u.trim())[0] || null,
                 tutorials: finalTutorials,
                 download_count: form.download_count || 0,
                 likes_count: form.likes_count || 0
@@ -443,8 +446,13 @@ export function AdminAppFormPage() {
                             />
                         </AdminFormField>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <AdminFormField label="Community URL">
-                                <CommunityUrlInput value={form.discord_url} onChange={(url) => setForm(f => ({ ...f, discord_url: url }))} placeholder="https://discord.gg/... or https://t.me/..." />
+                            <AdminFormField label="Social / Community Links">
+                                <SocialUrlsInput
+                                    value={form.social_urls}
+                                    onChange={(urls) => setForm(f => ({ ...f, social_urls: urls }))}
+                                    placeholder="https://discord.gg/... or https://t.me/..."
+                                    max={5}
+                                />
                             </AdminFormField>
                             <AdminFormField label="Download URL">
                                 <AdminInput value={form.download_url} onChange={e => setForm(f => ({ ...f, download_url: e.target.value }))} placeholder="https://..." />

@@ -29,6 +29,9 @@ export function useAppMeta(): { apps: AppData[]; loading: boolean } {
             githubUrl: app.repo_url,
             officialSite: app.website_url,
             discordUrl: app.discord_url,
+            socialUrls: (Array.isArray(app.social_urls) && app.social_urls.length > 0)
+                ? app.social_urls.filter((u: string) => u)
+                : (app.discord_url ? [app.discord_url] : []),
             tutorials: app.tutorials || [],
             forkOf: app.fork_of,
             upstreamUrl: app.upstream_url,

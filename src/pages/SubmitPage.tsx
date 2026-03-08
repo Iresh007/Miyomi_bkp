@@ -12,7 +12,7 @@ import {
 import { toast } from 'sonner';
 import Turnstile from 'react-turnstile';
 import { Navbar } from '@/components/Navbar';
-import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
+import { SocialUrlsInput } from '@/components/admin/SocialUrlsInput';
 
 
 const PLATFORM_OPTIONS = ['Android', 'iOS', 'Windows', 'macOS', 'Linux', 'Web'];
@@ -63,6 +63,7 @@ export function SubmitPage() {
     download_url: '',
     source_url: '',
     discord_url: '',
+    social_urls: [''] as string[],
     auto_url: '',
     manual_url: '',
     icon_url: '',
@@ -264,7 +265,8 @@ export function SubmitPage() {
         icon_color: form.icon_color,
         repo_url: form.repo_url,
         website_url: form.website_url,
-        discord_url: form.discord_url,
+        discord_url: form.social_urls.filter(u => u.trim())[0] || form.discord_url,
+        social_urls: form.social_urls.filter(u => u.trim()),
         platforms: form.platforms,
         tags: form.tags,
         ...(type === 'app' ? {
@@ -543,11 +545,12 @@ export function SubmitPage() {
                   placeholder="https://..."
                 />
               </AdminFormField>
-              <AdminFormField label="Community URL">
-                <CommunityUrlInput
-                  value={form.discord_url}
-                  onChange={(url) => setForm(f => ({ ...f, discord_url: url }))}
+              <AdminFormField label="Social / Community Links">
+                <SocialUrlsInput
+                  value={form.social_urls}
+                  onChange={(urls) => setForm(f => ({ ...f, social_urls: urls }))}
                   placeholder="https://discord.gg/... or https://t.me/..."
+                  max={5}
                 />
               </AdminFormField>
             </div>

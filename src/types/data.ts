@@ -35,6 +35,7 @@ export interface AppData {
     getApp?: string;
     officialSite?: string;
     discordUrl?: string;
+    socialUrls?: string[];
     tutorials?: readonly AppTutorial[];
     rating?: number;
     downloads?: number;
@@ -73,6 +74,7 @@ export interface ExtensionData {
     keywords?: readonly string[];
     tutorials?: readonly ExtensionTutorial[];
     rating?: number;
+    socialUrls?: string[];
     downloadCount?: number;
     likes?: number;
     createdAt?: string;

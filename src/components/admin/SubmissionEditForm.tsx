@@ -4,7 +4,7 @@ import { AdminFormField, AdminInput, AdminTextarea, AdminSelect, AdminButton } f
 import { AdminSmartSelect } from '@/components/admin/AdminSmartSelect';
 import { extractColorFromImage } from '@/utils/extractColorFromImage';
 import { toast } from 'sonner';
-import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
+import { SocialUrlsInput } from '@/components/admin/SocialUrlsInput';
 
 const PLATFORM_OPTIONS = ['Android', 'iOS', 'Windows', 'macOS', 'Linux', 'Web'];
 const CONTENT_TYPE_OPTIONS = ['Anime', 'Manga', 'Light Novel', 'Webtoon', 'Comics'];
@@ -223,8 +223,20 @@ export function SubmissionEditForm({ type, data, onChange }: SubmissionEditFormP
                         placeholder="https://..."
                     />
                 </AdminFormField>
-                <AdminFormField label="Community URL">
-                    <CommunityUrlInput value={form.discord_url || ''} onChange={(url) => updateField('discord_url', url)} placeholder="https://discord.gg/... or https://t.me/..." />
+                <AdminFormField label="Social / Community Links">
+                    <SocialUrlsInput
+                        value={(() => {
+                            if (Array.isArray(form.social_urls) && form.social_urls.length > 0) return form.social_urls;
+                            if (form.discord_url) return [form.discord_url];
+                            return [''];
+                        })()}
+                        onChange={(urls) => {
+                            updateField('social_urls', urls);
+                            updateField('discord_url', urls.filter((u: string) => u.trim())[0] || '');
+                        }}
+                        placeholder="https://discord.gg/... or https://t.me/..."
+                        max={5}
+                    />
                 </AdminFormField>
                 {type === 'app' && (
                     <AdminFormField label="Download URL">

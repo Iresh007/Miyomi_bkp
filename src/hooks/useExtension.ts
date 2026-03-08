@@ -47,6 +47,9 @@ export function useExtension(extensionId: string): { extension: ExtensionData | 
                         website: data.website_url,
                         keywords: data.tags || [],
                         tutorials: Array.isArray(data.tutorials) ? data.tutorials : [],
+                        socialUrls: (Array.isArray(data.social_urls) && data.social_urls.length > 0)
+                            ? data.social_urls.filter((u: string) => u)
+                            : (data.discord_url ? [data.discord_url] : []),
                         rating: 0,
                         downloadCount: data.download_count || 0,
                         likes: data.likes_count || 0

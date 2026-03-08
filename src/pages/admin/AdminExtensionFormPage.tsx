@@ -7,7 +7,7 @@ import { AdminSmartSelect } from '@/components/admin/AdminSmartSelect';
 import { ArrowLeft, Save, Loader2, Palette, Github, Download, Copy, Check, Link2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { extractColorFromImage } from '@/utils/extractColorFromImage';
-import { CommunityUrlInput } from '@/components/admin/CommunityUrlInput';
+import { SocialUrlsInput } from '@/components/admin/SocialUrlsInput';
 
 function slugify(text: string): string {
     return text
@@ -25,7 +25,7 @@ const emptyExt = {
     types: [] as string[],
     compatible_with: [] as string[], repo_url: '', source_url: '',
     icon_url: '', icon_color: '',
-    auto_url: '', manual_url: '', discord_url: '',
+    auto_url: '', manual_url: '', social_urls: [] as string[],
     tutorials: [] as any[],
     download_count: 0, likes_count: 0
 };
@@ -251,7 +251,9 @@ export function AdminExtensionFormPage() {
                     icon_color: extData.icon_color || '',
                     auto_url: extData.auto_url || '',
                     manual_url: extData.manual_url || '',
-                    discord_url: extData.discord_url || '',
+                    social_urls: (Array.isArray(extData.social_urls) && extData.social_urls.length > 0)
+                        ? extData.social_urls.filter((u: string) => u)
+                        : (extData.discord_url ? [extData.discord_url] : []),
                     tutorials: loadedTutorials,
                     download_count: extData.download_count || 0,
                     likes_count: extData.likes_count || 0
@@ -322,7 +324,8 @@ export function AdminExtensionFormPage() {
                 icon_color: form.icon_color || null,
                 auto_url: form.auto_url || null,
                 manual_url: form.manual_url || null,
-                discord_url: form.discord_url || null,
+                social_urls: form.social_urls.filter(u => u.trim()) || [],
+                discord_url: form.social_urls.filter(u => u.trim())[0] || null,
                 tutorials: finalTutorials,
                 download_count: form.download_count || 0,
                 likes_count: form.likes_count || 0
@@ -480,8 +483,13 @@ export function AdminExtensionFormPage() {
                             <AdminFormField label="Source URL">
                                 <AdminInput value={form.source_url} onChange={e => setForm(f => ({ ...f, source_url: e.target.value }))} placeholder="https://..." />
                             </AdminFormField>
-                            <AdminFormField label="Community URL">
-                                <CommunityUrlInput value={form.discord_url} onChange={(url) => setForm(f => ({ ...f, discord_url: url }))} placeholder="https://discord.gg/... or https://t.me/..." />
+                            <AdminFormField label="Social / Community Links">
+                                <SocialUrlsInput
+                                    value={form.social_urls}
+                                    onChange={(urls) => setForm(f => ({ ...f, social_urls: urls }))}
+                                    placeholder="https://discord.gg/... or https://t.me/..."
+                                    max={5}
+                                />
                             </AdminFormField>
                         </div>
                     </div>

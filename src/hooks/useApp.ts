@@ -37,6 +37,9 @@ export function useApp(appId: string): { app: AppData | null; loading: boolean }
             githubUrl: data.repo_url,
             officialSite: data.website_url,
             discordUrl: data.discord_url,
+            socialUrls: (Array.isArray(data.social_urls) && data.social_urls.length > 0)
+                ? data.social_urls.filter((u: string) => u)
+                : (data.discord_url ? [data.discord_url] : []),
             tutorials: data.tutorials || [],
             forkOf: data.fork_of,
             upstreamUrl: data.upstream_url,
